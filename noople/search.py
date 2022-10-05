@@ -7,7 +7,7 @@ common security vulnerabilities, such as XSS and SQLi.
 """
 
 import sqlite3
-from flask import Flask, current_app, request
+from flask import Flask, current_app, request, escape
 
 app = Flask(__name__)
 
@@ -39,7 +39,7 @@ def insert_query(search_query=None):
     cursor = conn.cursor()
 
     # Insert a row of data
-    cursor.executescript("INSERT INTO query VALUES (NULL, '" + search_query + "');")
+    cursor.execute("INSERT INTO query VALUES (NULL, ?);", (search_query,))
 
     # Save (commit) the changes
     conn.commit()
@@ -93,12 +93,12 @@ def get_recent_searches_html():
     # Get recent queries from the database
     recent_queries = select_recent_queries()
 
-    # If results were returned, create an HTML list
+     # If results were returned, create an HTML list
     if recent_queries:
         recent_searches = '<p>Recent searches:</p><ul>'
         for query in recent_queries:
-            recent_searches += f'<li><a href="/?q={query[0]}">'
-            recent_searches += f'{query[0]}'
+            recent_searches += f'<li><a href="/?q={escape(query[0])}">'
+            recent_searches += f'{escape(query[0])}'
             recent_searches += '</a></li>'
         recent_searches += '</ul>'
         return recent_searches
